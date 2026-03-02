@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sigara Bırakma Oyunu</title>
+
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg, #1e1e2f, #2c3e50);
+    color: white;
+    text-align: center;
+    padding: 30px;
+}
+
+.container {
+    max-width: 400px;
+    margin: auto;
+    background: #2f3640;
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.4);
+}
+
+h1 {
+    margin-bottom: 10px;
+}
+
+.stat {
+    margin: 15px 0;
+    font-size: 18px;
+}
+
+button {
+    background: #27ae60;
+    border: none;
+    padding: 12px 20px;
+    font-size: 16px;
+    color: white;
+    border-radius: 8px;
+    cursor: pointer;
+    margin: 5px;
+}
+
+button:hover {
+    background: #2ecc71;
+}
+
+.reset-btn {
+    background: #e74c3c;
+}
+
+.reset-btn:hover {
+    background: #c0392b;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 20px;
+    background: #444;
+    border-radius: 10px;
+    margin-top: 10px;
+    overflow: hidden;
+}
+
+.progress {
+    height: 100%;
+    width: 0%;
+    background: #f1c40f;
+    transition: 0.5s;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+    <h1>🚭 Sigara Bırakma Oyunu</h1>
+    <p id="startDate"></p>
+
+    <div class="stat">🔥 Seri: <span id="streak">0</span> gün</div>
+    <div class="stat">💰 Biriken Para: <span id="money">0</span> TL</div>
+    <div class="stat">💪 Güç Seviyesi: <span id="level">1</span></div>
+
+    <div class="progress-bar">
+        <div class="progress" id="progress"></div>
+    </div>
+
+    <button onclick="smokeFree()">1 tane sigara İçmedim 💪</button>
+    <button onclick="undo()" style="background:#f39c12;">Yanlış Tıkladım Geri ⬅️</button>
+    <button class="reset-btn" onclick="resetGame()">Sıfırla 🔥</button>
+</div>
+
+<script>
+const DAILY_COST = 5.75; // Günlük sigara masrafı
+
+function init() {
+    if (!localStorage.getItem("smokeGame")) {
+        const data = {
+            startDate: new Date(),
+            streak: 0,
+        };
+        localStorage.setItem("smokeGame", JSON.stringify(data));
+    }
+    updateUI();
+}
+
+function smokeFree() {
+    let data = JSON.parse(localStorage.getItem("smokeGame"));
+    data.streak += 1;
+    localStorage.setItem("smokeGame", JSON.stringify(data));
+    updateUI();
+}
+
+// Yeni: Eksiltme fonksiyonu
+function undo() {
+    let data = JSON.parse(localStorage.getItem("smokeGame"));
+    if(data.streak > 0){
+        data.streak -= 1;
+        localStorage.setItem("smokeGame", JSON.stringify(data));
+        updateUI();
+    }
+}
+
+// Yeni: Sıfırlama fonksiyonu
+function resetGame() {
+    if(confirm("Tüm ilerlemeyi sıfırlamak istediğine emin misin?")){
+        localStorage.removeItem("smokeGame");
+        init();
+    }
+}
+
+function updateUI() {
+    let data = JSON.parse(localStorage.getItem("smokeGame"));
+
+    document.getElementById("streak").innerText = data.streak;
+
+    let money = (data.streak * DAILY_COST).toFixed(2);
+    document.getElementById("money").innerText = money;
+
+    let level = Math.floor(data.streak / 7) + 1;
+    document.getElementById("level").innerText = level;
+
+    let progressPercent = (data.streak % 7) / 7 * 100;
+    document.getElementById("progress").style.width = progressPercent + "%";
+
+    let startDate = new Date(data.startDate);
+    document.getElementById("startDate").innerText =
+        "Başlangıç: " + startDate.toLocaleDateString("tr-TR");
+}
+
+init();
+</script>
+
+</body>
+</html>
